@@ -41,6 +41,6 @@ Run the following to start the project
 
 ### Local :
 ```shell
-npm start
-npm test
+npm run dev
+npm run test
 ```
