@@ -25,6 +25,9 @@ export function evaluateHand(hand: Hand): number {
 	const pairs = Array.from(frequencies.entries()).filter(([_, count]) => count === 2);
 	const threes = Array.from(frequencies.entries()).filter(([_, count]) => count === 3);
 	
+	if (isStraight(hand)) {
+		return evaluateStraight(hand);
+	}
 	if (threes.length === 1) {
 		return evaluateThreeOfAKind(hand);
 	}
@@ -199,4 +202,28 @@ export function evaluateThreeOfAKind(hand: Hand): number {
 	});
 	
 	return score;
+}
+
+/**
+ * Evaluates a straight hand
+ * @param hand The poker hand
+ * @returns The score for the straight hand
+ */
+export function evaluateStraight(hand: Hand): number {
+	if (!isStraight(hand)) {
+		throw new Error('Hand is not a straight');
+	}
+	
+	const sortedHand = sortByRank(hand);
+	const ranks = sortedHand.map(card => rankValue(getRank(card)));
+	
+	// Special case for A-5-4-3-2 straight (wheel)
+	// In standard poker rules, this is the lowest straight
+	if (ranks[0] === 14 && ranks[1] === 5) {
+		// In A-5-4-3-2 straight, the 5 is the highest card for ranking purposes
+		return HandType.Straight * 10 ** 14 + 5 * 10 ** 8;
+	}
+	
+	// Regular straight - value is determined by the highest card
+	return HandType.Straight * 10 ** 14 + ranks[0] * 10 ** 8;
 }
