@@ -1,5 +1,5 @@
 // Define suit types
-export type Suit = '♦' | '󰋑' | '♣' | '♠';
+export type Suit = '♦' | '♥' | '♣' | '♠';
 
 // Define rank types
 export type Rank =
