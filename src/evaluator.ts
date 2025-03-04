@@ -25,6 +25,12 @@ export function evaluateHand(hand: Hand): number {
 	const pairs = Array.from(frequencies.entries()).filter(([_, count]) => count === 2);
 	const threes = Array.from(frequencies.entries()).filter(([_, count]) => count === 3);
 	
+	if (threes.length === 1 && pairs.length === 1) {
+		return evaluateFullHouse(hand);
+	}
+	if (isSameSuit(hand)) {
+		return evaluateFlush(hand);
+	}
 	if (isStraight(hand)) {
 		return evaluateStraight(hand);
 	}
@@ -226,4 +232,48 @@ export function evaluateStraight(hand: Hand): number {
 	
 	// Regular straight - value is determined by the highest card
 	return HandType.Straight * 10 ** 14 + ranks[0] * 10 ** 8;
+}
+
+/**
+ * Evaluates a flush hand
+ * @param hand The poker hand
+ * @returns The score for the flush hand
+ */
+export function evaluateFlush(hand: Hand): number {
+	if (!isSameSuit(hand)) {
+		throw new Error('Hand is not a flush');
+	}
+	const sortedHand = sortByRank(hand);
+	let score = HandType.Flush * 10 ** 14;
+	
+	sortedHand.forEach((card, index) => {
+		const value = rankValue(getRank(card));
+		score += value * 10 ** (2 * (4 - index));
+	});
+	
+	return score;
+}
+
+/**
+ * Evaluates a full house hand
+ * @param hand The poker hand
+ * @returns The score for the full house hand
+ */
+export function evaluateFullHouse(hand: Hand): number {
+	const frequencies = getRankFrequencies(hand);
+	const threes = Array.from(frequencies.entries()).filter(([_, count]) => count === 3);
+	const pairs = Array.from(frequencies.entries()).filter(([_, count]) => count === 2);
+	
+	if (threes.length !== 1 || pairs.length !== 1) {
+		throw new Error('Hand does not contain a full house');
+	}
+	
+	let score = HandType.FullHouse * 10 ** 14;
+	const threeRank = threes[0][0];
+	const pairRank = pairs[0][0];
+	
+	score += rankValue(threeRank) * 10 ** 8;
+	score += rankValue(pairRank) * 10 ** 4;
+	
+	return score;
 }

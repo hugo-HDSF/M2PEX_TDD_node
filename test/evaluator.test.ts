@@ -6,7 +6,7 @@ import {
 	evaluateOnePair,
 	evaluateHand,
 	evaluateThreeOfAKind,
-	evaluateStraight, evaluateFlush
+	evaluateStraight, evaluateFlush, evaluateFullHouse
 } from '../src';
 import { Hand } from '../src';
 
@@ -166,5 +166,34 @@ describe('Hand Evaluation - Flush', () => {
 		const nonFlushHand: Hand = ['♦a', '♥r', '♠10', '♣7', '♦3'];
 		
 		expect(() => evaluateFlush(nonFlushHand)).toThrow();
+	});
+});
+
+describe('Hand Evaluation - Full House', () => {
+	test('evaluateFullHouse should identify and rank full house hands correctly', () => {
+		const fullHouse1: Hand = ['♦a', '♥a', '♠a', '♣8', '♦8'];
+		const fullHouse2: Hand = ['♦r', '♥r', '♠r', '♣9', '♦9'];
+		const fullHouse3: Hand = ['♦a', '♥a', '♠a', '♣7', '♦7'];
+		
+		const score1 = evaluateFullHouse(fullHouse1);
+		const score2 = evaluateFullHouse(fullHouse2);
+		const score3 = evaluateFullHouse(fullHouse3);
+		
+		expect(score1).toBeGreaterThan(score2);
+		expect(score1).toBeGreaterThan(score3);
+		expect(score3).toBeGreaterThan(score2);
+	});
+	
+	test('evaluateHand should correctly identify a full house', () => {
+		const fullHouse: Hand = ['♦a', '♥a', '♠a', '♣7', '♦7'];
+		const flush: Hand = ['♦9', '♦8', '♦7', '♦6', '♦5'];
+		
+		expect(evaluateHand(fullHouse)).toBeGreaterThan(evaluateHand(flush));
+	});
+	
+	test('evaluateFullHouse should throw error for non-full house hand', () => {
+		const nonFullHouseHand: Hand = ['♦a', '♥r', '♠10', '♣7', '♦3'];
+		
+		expect(() => evaluateFullHouse(nonFullHouseHand)).toThrow();
 	});
 });
