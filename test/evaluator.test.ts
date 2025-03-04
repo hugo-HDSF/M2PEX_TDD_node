@@ -6,7 +6,7 @@ import {
 	evaluateOnePair,
 	evaluateHand,
 	evaluateThreeOfAKind,
-	evaluateStraight
+	evaluateStraight, evaluateFlush
 } from '../src';
 import { Hand } from '../src';
 
@@ -112,30 +112,59 @@ describe('Hand Evaluation - Three of a Kind', () => {
 });
 
 describe('Hand Evaluation - Straight', () => {
-  test('evaluateStraight should identify and rank straight hands correctly', () => {
-    const aceHighStraight: Hand = ['♦a', '♥r', '♠d', '♣v', '♦10'];
-    const nineHighStraight: Hand = ['♦9', '♥8', '♠7', '♣6', '♦5'];
-    const fiveHighStraight: Hand = ['♦5', '♥4', '♠3', '♣2', '♦a'];
-    
-    const score1 = evaluateStraight(aceHighStraight);
-    const score2 = evaluateStraight(nineHighStraight);
-    const score3 = evaluateStraight(fiveHighStraight);
-    
-    expect(score1).toBeGreaterThan(score2);
-    expect(score2).toBeGreaterThan(score3);
-    expect(score1).toBeGreaterThan(score3);
-  });
-  
-  test('evaluateHand should correctly identify a straight', () => {
-    const straight: Hand = ['♦9', '♥8', '♠7', '♣6', '♦5'];
-    const threeOfAKind: Hand = ['♦a', '♥a', '♠a', '♣7', '♦3'];
-    
-    expect(evaluateHand(straight)).toBeGreaterThan(evaluateHand(threeOfAKind));
-  });
-  
-  test('evaluateStraight should throw error for non-straight hand', () => {
-    const nonStraightHand: Hand = ['♦a', '♥r', '♠10', '♣7', '♦3'];
-    
-    expect(() => evaluateStraight(nonStraightHand)).toThrow();
-  });
+	test('evaluateStraight should identify and rank straight hands correctly', () => {
+		const aceHighStraight: Hand = ['♦a', '♥r', '♠d', '♣v', '♦10'];
+		const nineHighStraight: Hand = ['♦9', '♥8', '♠7', '♣6', '♦5'];
+		const fiveHighStraight: Hand = ['♦5', '♥4', '♠3', '♣2', '♦a'];
+		
+		const score1 = evaluateStraight(aceHighStraight);
+		const score2 = evaluateStraight(nineHighStraight);
+		const score3 = evaluateStraight(fiveHighStraight);
+		
+		expect(score1).toBeGreaterThan(score2);
+		expect(score2).toBeGreaterThan(score3);
+		expect(score1).toBeGreaterThan(score3);
+	});
+	
+	test('evaluateHand should correctly identify a straight', () => {
+		const straight: Hand = ['♦9', '♥8', '♠7', '♣6', '♦5'];
+		const threeOfAKind: Hand = ['♦a', '♥a', '♠a', '♣7', '♦3'];
+		
+		expect(evaluateHand(straight)).toBeGreaterThan(evaluateHand(threeOfAKind));
+	});
+	
+	test('evaluateStraight should throw error for non-straight hand', () => {
+		const nonStraightHand: Hand = ['♦a', '♥r', '♠10', '♣7', '♦3'];
+		
+		expect(() => evaluateStraight(nonStraightHand)).toThrow();
+	});
+});
+
+describe('Hand Evaluation - Flush', () => {
+	test('evaluateFlush should identify and rank flush hands correctly', () => {
+		const flush1: Hand = ['♦9', '♦8', '♦7', '♦6', '♦5'];
+		const flush2: Hand = ['♥10', '♥9', '♥8', '♥7', '♥6'];
+		const flush3: Hand = ['♠a', '♠2', '♠3', '♠4', '♠5'];
+		
+		const score1 = evaluateFlush(flush1);
+		const score2 = evaluateFlush(flush2);
+		const score3 = evaluateFlush(flush3);
+		
+		expect(score2).toBeGreaterThan(score1);
+		expect(score3).toBeGreaterThan(score2);
+		expect(score3).toBeGreaterThan(score1);
+	});
+	
+	test('evaluateHand should correctly identify a flush', () => {
+		const flush: Hand = ['♦9', '♦8', '♦7', '♦6', '♦5'];
+		const straight: Hand = ['♦9', '♥8', '♠7', '♣6', '♦5'];
+		
+		expect(evaluateHand(flush)).toBeGreaterThan(evaluateHand(straight));
+	});
+	
+	test('evaluateFlush should throw error for non-flush hand', () => {
+		const nonFlushHand: Hand = ['♦a', '♥r', '♠10', '♣7', '♦3'];
+		
+		expect(() => evaluateFlush(nonFlushHand)).toThrow();
+	});
 });
