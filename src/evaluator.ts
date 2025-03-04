@@ -333,9 +333,7 @@ export function evaluateStraightFlush(hand: Hand): number {
 	// Check if this is a royal flush (A-K-Q-J-10 of same suit)
 	if (ranks[0] === 14 && ranks[1] === 13 && ranks[2] === 12 &&
 		ranks[3] === 11 && ranks[4] === 10) {
-		//royal flush next commit
-		//return evaluateRoyalFlush(hand);
-		return HandType.RoyalFlush * 10 ** 14;
+		return evaluateRoyalFlush(hand);
 	}
 	
 	// For regular straight flushes
@@ -352,4 +350,27 @@ export function evaluateStraightFlush(hand: Hand): number {
 	// Value for regular straight flush is the highest card
 	score += ranks[0] * 10 ** 8;
 	return score;
+}
+
+/**
+ * Evaluates a royal flush hand
+ * @param hand The poker hand
+ * @returns The score for the royal flush hand
+ */
+export function evaluateRoyalFlush(hand: Hand): number {
+	if (!isSameSuit(hand)) {
+		throw new Error('Hand is not a royal flush');
+	}
+	
+	const sortedHand = sortByRank(hand);
+	const ranks = sortedHand.map(card => rankValue(getRank(card)));
+	
+	// Check if this is really a royal flush
+	if (!(ranks[0] === 14 && ranks[1] === 13 && ranks[2] === 12 &&
+		ranks[3] === 11 && ranks[4] === 10)) {
+		throw new Error('Hand is not a royal flush');
+	}
+	
+	// There's only one possible royal flush per suit, so no tiebreakers needed
+	return HandType.RoyalFlush * 10 ** 14;
 }

@@ -10,7 +10,7 @@ import {
 	evaluateFlush,
 	evaluateFullHouse,
 	evaluateFourOfAKind,
-	evaluateStraightFlush
+	evaluateStraightFlush, evaluateRoyalFlush, HandType
 } from '../src';
 import { Hand } from '../src';
 
@@ -257,5 +257,26 @@ describe('Hand Evaluation - Straight Flush', () => {
 		const nonStraightFlushHand: Hand = ['♦a', '♥r', '♠10', '♣7', '♦3'];
 		
 		expect(() => evaluateStraightFlush(nonStraightFlushHand)).toThrow();
+	});
+});
+
+describe('Hand Evaluation - Royal Flush', () => {
+	test('evaluateRoyalFlush should identify a royal flush hand correctly', () => {
+		const royalFlush: Hand = ['♦a', '♦r', '♦d', '♦v', '♦10'];
+		const notRoyalFlushDifferentSuit: Hand = ['♦a', '♥r', '♦d', '♦v', '♦10'];
+		const straightFlush: Hand = ['♦r', '♦d', '♦v', '♦10', '♦9'];
+		
+		const score = evaluateRoyalFlush(royalFlush);
+		
+		expect(score).toBe(HandType.RoyalFlush * 10 ** 14);
+		expect(() => evaluateRoyalFlush(notRoyalFlushDifferentSuit)).toThrow();
+		expect(() => evaluateRoyalFlush(straightFlush)).toThrow();
+	});
+	
+	test('evaluateHand should correctly identify a royal flush', () => {
+		const royalFlush: Hand = ['♦a', '♦r', '♦d', '♦v', '♦10'];
+		const straightFlush: Hand = ['♦r', '♦d', '♦v', '♦10', '♦9'];
+		
+		expect(evaluateHand(royalFlush)).toBeGreaterThan(evaluateHand(straightFlush));
 	});
 });
