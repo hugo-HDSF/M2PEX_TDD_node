@@ -26,6 +26,11 @@ export function evaluateHand(hand: Hand): number {
 	const threes = Array.from(frequencies.entries()).filter(([_, count]) => count === 3);
 	const fours = Array.from(frequencies.entries()).filter(([_, count]) => count === 4);
 	
+	// Check for straight flush
+	if (isSameSuit(hand) && isStraight(hand)) {
+		return evaluateStraightFlush(hand);
+	}
+	
 	if (fours.length === 1) {
 		return evaluateFourOfAKind(hand);
 	}
@@ -309,5 +314,42 @@ export function evaluateFourOfAKind(hand: Hand): number {
 		score += rankValue(getRank(kicker)) * 10 ** 4;
 	}
 	
+	return score;
+}
+
+/**
+ * Evaluates a straight flush hand
+ * @param hand The poker hand
+ * @returns The score for the straight flush hand
+ */
+export function evaluateStraightFlush(hand: Hand): number {
+	if (!isSameSuit(hand) || !isStraight(hand)) {
+		throw new Error('Hand is not a straight flush');
+	}
+	
+	const sortedHand = sortByRank(hand);
+	const ranks = sortedHand.map(card => rankValue(getRank(card)));
+	
+	// Check if this is a royal flush (A-K-Q-J-10 of same suit)
+	if (ranks[0] === 14 && ranks[1] === 13 && ranks[2] === 12 &&
+		ranks[3] === 11 && ranks[4] === 10) {
+		//royal flush next commit
+		//return evaluateRoyalFlush(hand);
+		return HandType.RoyalFlush * 10 ** 14;
+	}
+	
+	// For regular straight flushes
+	// Base score for straight flush
+	let score = HandType.StraightFlush * 10 ** 14;
+	
+	// Special case for A-5-4-3-2 straight flush
+	if (ranks[0] === 14 && ranks[1] === 5) {
+		// In A-5-4-3-2 straight, the 5 is the highest card
+		score += 5 * 10 ** 8;
+		return score;
+	}
+	
+	// Value for regular straight flush is the highest card
+	score += ranks[0] * 10 ** 8;
 	return score;
 }

@@ -6,7 +6,11 @@ import {
 	evaluateOnePair,
 	evaluateHand,
 	evaluateThreeOfAKind,
-	evaluateStraight, evaluateFlush, evaluateFullHouse, evaluateFourOfAKind
+	evaluateStraight,
+	evaluateFlush,
+	evaluateFullHouse,
+	evaluateFourOfAKind,
+	evaluateStraightFlush
 } from '../src';
 import { Hand } from '../src';
 
@@ -185,8 +189,9 @@ describe('Hand Evaluation - Full House', () => {
 	});
 	
 	test('evaluateHand should correctly identify a full house', () => {
-		const fullHouse: Hand = ['♦a', '♥a', '♠a', '♣7', '♦7'];
-		const flush: Hand = ['♦9', '♦8', '♦7', '♦6', '♦5'];
+		const fullHouse: Hand = ['♦a', '♥a', '♠a', '♣r', '♦r'];
+		// Use a non-consecutive flush instead of a straight flush
+		const flush: Hand = ['♥a', '♥r', '♥10', '♥7', '♥2'];
 		
 		expect(evaluateHand(fullHouse)).toBeGreaterThan(evaluateHand(flush));
 	});
@@ -224,5 +229,33 @@ describe('Hand Evaluation - Four of a Kind', () => {
 		const nonFourOfAKindHand: Hand = ['♦a', '♥r', '♠10', '♣7', '♦3'];
 		
 		expect(() => evaluateFourOfAKind(nonFourOfAKindHand)).toThrow();
+	});
+});
+
+describe('Hand Evaluation - Straight Flush', () => {
+	test('evaluateStraightFlush should identify and rank straight flush hands correctly', () => {
+		const kingHighStraightFlush: Hand = ['♦r', '♦d', '♦v', '♦10', '♦9'];
+		const nineHighStraightFlush: Hand = ['♥9', '♥8', '♥7', '♥6', '♥5'];
+		const fiveHighStraightFlush: Hand = ['♠5', '♠4', '♠3', '♠2', '♠a'];
+		
+		const score1 = evaluateStraightFlush(kingHighStraightFlush);
+		const score2 = evaluateStraightFlush(nineHighStraightFlush);
+		const score3 = evaluateStraightFlush(fiveHighStraightFlush);
+		
+		expect(score1).toBeGreaterThan(score2);
+		expect(score2).toBeGreaterThan(score3);
+	});
+	
+	test('evaluateHand should correctly identify a straight flush', () => {
+		const straightFlush: Hand = ['♦9', '♦8', '♦7', '♦6', '♦5'];
+		const fourOfAKind: Hand = ['♦a', '♥a', '♠a', '♣a', '♦r'];
+		
+		expect(evaluateHand(straightFlush)).toBeGreaterThan(evaluateHand(fourOfAKind));
+	});
+	
+	test('evaluateStraightFlush should throw error for non-straight flush hand', () => {
+		const nonStraightFlushHand: Hand = ['♦a', '♥r', '♠10', '♣7', '♦3'];
+		
+		expect(() => evaluateStraightFlush(nonStraightFlushHand)).toThrow();
 	});
 });
