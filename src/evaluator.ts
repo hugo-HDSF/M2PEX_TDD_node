@@ -24,7 +24,11 @@ export function evaluateHand(hand: Hand): number {
 	const frequencies = getRankFrequencies(hand);
 	const pairs = Array.from(frequencies.entries()).filter(([_, count]) => count === 2);
 	const threes = Array.from(frequencies.entries()).filter(([_, count]) => count === 3);
+	const fours = Array.from(frequencies.entries()).filter(([_, count]) => count === 4);
 	
+	if (fours.length === 1) {
+		return evaluateFourOfAKind(hand);
+	}
 	if (threes.length === 1 && pairs.length === 1) {
 		return evaluateFullHouse(hand);
 	}
@@ -274,6 +278,36 @@ export function evaluateFullHouse(hand: Hand): number {
 	
 	score += rankValue(threeRank) * 10 ** 8;
 	score += rankValue(pairRank) * 10 ** 4;
+	
+	return score;
+}
+
+
+/**
+ * Evaluates a four of a kind hand
+ * @param hand The poker hand
+ * @returns The score for the four of a kind hand
+ */
+export function evaluateFourOfAKind(hand: Hand): number {
+	const frequencies = getRankFrequencies(hand);
+	const fours = Array.from(frequencies.entries()).filter(([_, count]) => count === 4);
+	
+	if (fours.length !== 1) {
+		throw new Error('Hand is not a four of a kind');
+	}
+	
+	// Base value for hand type (0-9) * 10^14
+	let score = HandType.FourOfAKind * 10 ** 14;
+	
+	// Add four of a kind value as primary tiebreaker
+	const fourRank = fours[0][0];
+	score += rankValue(fourRank) * 10 ** 8;
+	
+	// Add kicker value as secondary tiebreaker
+	const kicker = hand.find(card => getRank(card) !== fourRank);
+	if (kicker) {
+		score += rankValue(getRank(kicker)) * 10 ** 4;
+	}
 	
 	return score;
 }

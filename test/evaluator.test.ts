@@ -6,7 +6,7 @@ import {
 	evaluateOnePair,
 	evaluateHand,
 	evaluateThreeOfAKind,
-	evaluateStraight, evaluateFlush, evaluateFullHouse
+	evaluateStraight, evaluateFlush, evaluateFullHouse, evaluateFourOfAKind
 } from '../src';
 import { Hand } from '../src';
 
@@ -195,5 +195,34 @@ describe('Hand Evaluation - Full House', () => {
 		const nonFullHouseHand: Hand = ['♦a', '♥r', '♠10', '♣7', '♦3'];
 		
 		expect(() => evaluateFullHouse(nonFullHouseHand)).toThrow();
+	});
+});
+
+describe('Hand Evaluation - Four of a Kind', () => {
+	test('evaluateFourOfAKind should identify and rank four of a kind hands correctly', () => {
+		const fourAces: Hand = ['♦a', '♥a', '♠a', '♣a', '♦r'];
+		const fourKings: Hand = ['♦r', '♥r', '♠r', '♣r', '♦a'];
+		const fourAcesLowerKicker: Hand = ['♦a', '♥a', '♠a', '♣a', '♦d'];
+		
+		const score1 = evaluateFourOfAKind(fourAces);
+		const score2 = evaluateFourOfAKind(fourKings);
+		const score3 = evaluateFourOfAKind(fourAcesLowerKicker);
+		
+		expect(score1).toBeGreaterThan(score2);
+		expect(score1).toBeGreaterThan(score3);
+		expect(score3).toBeGreaterThan(score2);
+	});
+	
+	test('evaluateHand should correctly identify a four of a kind', () => {
+		const fourOfAKind: Hand = ['♦a', '♥a', '♠a', '♣a', '♦r'];
+		const fullHouse: Hand = ['♦a', '♥a', '♠a', '♣r', '♦r'];
+		
+		expect(evaluateHand(fourOfAKind)).toBeGreaterThan(evaluateHand(fullHouse));
+	});
+	
+	test('evaluateFourOfAKind should throw error for non-four of a kind hand', () => {
+		const nonFourOfAKindHand: Hand = ['♦a', '♥r', '♠10', '♣7', '♦3'];
+		
+		expect(() => evaluateFourOfAKind(nonFourOfAKindHand)).toThrow();
 	});
 });
