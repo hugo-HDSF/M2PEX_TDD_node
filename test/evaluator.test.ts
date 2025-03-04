@@ -2,7 +2,7 @@ import {
 	getRank,
 	getSuit,
 	rankValue,
-	evaluateHighCard, evaluateOnePair, evaluateHand
+	evaluateHighCard, evaluateOnePair, evaluateHand, evaluateThreeOfAKind
 } from '../src';
 import { Hand } from '../src';
 
@@ -50,30 +50,59 @@ describe('Hand Evaluation - High Card', () => {
 });
 
 describe('Hand Evaluation - One Pair', () => {
-  test('evaluateOnePair should identify and rank one pair hands correctly', () => {
-    const pairOfAces: Hand = ['♦a', '♥a', '♠10', '♣7', '♦3'];     // Pair of aces
-    const pairOfKings: Hand = ['♦r', '♥r', '♠10', '♣9', '♦3'];     // Pair of kings
-    const pairOfAcesLowerKicker: Hand = ['♦a', '♥a', '♠9', '♣8', '♦3']; // Pair of aces with lower kickers
-    
-    const score1 = evaluateOnePair(pairOfAces);
-    const score2 = evaluateOnePair(pairOfKings);
-    const score3 = evaluateOnePair(pairOfAcesLowerKicker);
-    
-    expect(score1).toBeGreaterThan(score2);     // Pair of aces > Pair of kings
-    expect(score1).toBeGreaterThan(score3);     // Same pair but better kicker
-    expect(score3).toBeGreaterThan(score2);     // Pair of aces > Pair of kings regardless of kicker
-  });
-  
-  test('evaluateHand should correctly identify a pair', () => {
-    const pairHand: Hand = ['♦a', '♥a', '♠10', '♣7', '♦3'];       // Pair of aces
-    const highCardHand: Hand = ['♦a', '♥r', '♠10', '♣7', '♦3'];   // High card ace
-    
-    expect(evaluateHand(pairHand)).toBeGreaterThan(evaluateHand(highCardHand));
-  });
-  
-  test('evaluateOnePair should throw error for non-pair hand', () => {
-    const nonPairHand: Hand = ['♦a', '♥r', '♠10', '♣7', '♦3'];
-    
-    expect(() => evaluateOnePair(nonPairHand)).toThrow();
-  });
+	test('evaluateOnePair should identify and rank one pair hands correctly', () => {
+		const pairOfAces: Hand = ['♦a', '♥a', '♠10', '♣7', '♦3'];     // Pair of aces
+		const pairOfKings: Hand = ['♦r', '♥r', '♠10', '♣9', '♦3'];     // Pair of kings
+		const pairOfAcesLowerKicker: Hand = ['♦a', '♥a', '♠9', '♣8', '♦3']; // Pair of aces with lower kickers
+		
+		const score1 = evaluateOnePair(pairOfAces);
+		const score2 = evaluateOnePair(pairOfKings);
+		const score3 = evaluateOnePair(pairOfAcesLowerKicker);
+		
+		expect(score1).toBeGreaterThan(score2);     // Pair of aces > Pair of kings
+		expect(score1).toBeGreaterThan(score3);     // Same pair but better kicker
+		expect(score3).toBeGreaterThan(score2);     // Pair of aces > Pair of kings regardless of kicker
+	});
+	
+	test('evaluateHand should correctly identify a pair', () => {
+		const pairHand: Hand = ['♦a', '♥a', '♠10', '♣7', '♦3'];       // Pair of aces
+		const highCardHand: Hand = ['♦a', '♥r', '♠10', '♣7', '♦3'];   // High card ace
+		
+		expect(evaluateHand(pairHand)).toBeGreaterThan(evaluateHand(highCardHand));
+	});
+	
+	test('evaluateOnePair should throw error for non-pair hand', () => {
+		const nonPairHand: Hand = ['♦a', '♥r', '♠10', '♣7', '♦3'];
+		
+		expect(() => evaluateOnePair(nonPairHand)).toThrow();
+	});
+});
+
+describe('Hand Evaluation - Three of a Kind', () => {
+	test('evaluateThreeOfAKind should identify and rank three of a kind hands correctly', () => {
+		const threeAces: Hand = ['♦a', '♥a', '♠a', '♣9', '♦3'];
+		const threeKings: Hand = ['♦r', '♥r', '♠r', '♣9', '♦3'];
+		const threeAcesLowerKicker: Hand = ['♦a', '♥a', '♠a', '♣8', '♦2'];
+		
+		const score1 = evaluateThreeOfAKind(threeAces);
+		const score2 = evaluateThreeOfAKind(threeKings);
+		const score3 = evaluateThreeOfAKind(threeAcesLowerKicker);
+		
+		expect(score1).toBeGreaterThan(score2);
+		expect(score1).toBeGreaterThan(score3);
+		expect(score3).toBeGreaterThan(score2);
+	});
+	
+	test('evaluateHand should correctly identify three of a kind', () => {
+		const threeAces: Hand = ['♦a', '♥a', '♠a', '♣7', '♦3'];
+		const pairAces: Hand = ['♦a', '♥a', '♠10', '♣7', '♦3'];
+		
+		expect(evaluateHand(threeAces)).toBeGreaterThan(evaluateHand(pairAces));
+	});
+	
+	test('evaluateThreeOfAKind should throw error for non-three of a kind hand', () => {
+		const nonThreeOfAKindHand: Hand = ['♦a', '♥r', '♠10', '♣7', '♦3'];
+		
+		expect(() => evaluateThreeOfAKind(nonThreeOfAKindHand)).toThrow();
+	});
 });

@@ -21,15 +21,16 @@ export function evaluateHands(hands: Hand[]): Score[] {
  * @returns Score value
  */
 export function evaluateHand(hand: Hand): number {
-	// Get frequency of each rank
 	const frequencies = getRankFrequencies(hand);
-	const pairs = Array.from(frequencies.entries())
-		.filter(([_, count]) => count === 2);
+	const pairs = Array.from(frequencies.entries()).filter(([_, count]) => count === 2);
+	const threes = Array.from(frequencies.entries()).filter(([_, count]) => count === 3);
 	
+	if (threes.length === 1) {
+		return evaluateThreeOfAKind(hand);
+	}
 	if (pairs.length === 2) {
 		return evaluateTwoPair(hand);
 	}
-	
 	if (pairs.length === 1) {
 		return evaluateOnePair(hand);
 	}
@@ -166,6 +167,36 @@ export function evaluateTwoPair(hand: Hand): number {
 		// Add kicker as tertiary tiebreaker
 		score += rankValue(getRank(kicker));
 	}
+	
+	return score;
+}
+
+/**
+ * Evaluates a hand with three of a kind
+ * @param hand The poker hand
+ * @returns The score for the three of a kind hand
+ */
+export function evaluateThreeOfAKind(hand: Hand): number {
+	const frequencies = getRankFrequencies(hand);
+	const threes = Array.from(frequencies.entries()).filter(([_, count]) => count === 3);
+	
+	if (threes.length !== 1) {
+		throw new Error('Hand does not contain exactly three of a kind');
+	}
+	
+	let score = HandType.ThreeOfAKind * 10 ** 14;
+	const threeRank = threes[0][0];
+	const threeValue = rankValue(threeRank);
+	
+	score += threeValue * 10 ** 8;
+	
+	const kickers = hand.filter(card => getRank(card) !== threeRank)
+		.map(card => rankValue(getRank(card)))
+		.sort((a, b) => b - a);
+	
+	kickers.forEach((value, index) => {
+		score += value * 10 ** (2 * (2 - index));
+	});
 	
 	return score;
 }
