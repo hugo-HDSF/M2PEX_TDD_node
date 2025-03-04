@@ -1,4 +1,10 @@
-import { getRank, getSuit, rankValue } from '../src';
+import {
+	getRank,
+	getSuit,
+	rankValue,
+	evaluateHighCard
+} from '../src';
+import { Hand } from '../src';
 
 describe('Basic Card Functions', () => {
 	test('getRank should extract the correct rank from a card', () => {
@@ -24,5 +30,21 @@ describe('Basic Card Functions', () => {
 		expect(rankValue('v')).toBe(11);
 		expect(rankValue('10')).toBe(10);
 		expect(rankValue('2')).toBe(2);
+	});
+});
+
+describe('Hand Evaluation - High Card', () => {
+	test('evaluateHighCard should rank hands correctly', () => {
+		const hand1: Hand = ['♦a', '♥r', '♠10', '♣7', '♦3']; // Ace high
+		const hand2: Hand = ['♦r', '♥d', '♠10', '♣9', '♦3']; // King high
+		const hand3: Hand = ['♦a', '♥d', '♠10', '♣9', '♦3']; // Ace high but different kicker
+		
+		const score1 = evaluateHighCard(hand1);
+		const score2 = evaluateHighCard(hand2);
+		const score3 = evaluateHighCard(hand3);
+		
+		expect(score1).toBeGreaterThan(score2); // Ace high > King high
+		expect(score1).toBeGreaterThan(score3); // Same Ace high but better kicker
+		expect(score3).toBeGreaterThan(score2); // Ace high > King high
 	});
 });

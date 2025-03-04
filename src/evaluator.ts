@@ -1,4 +1,7 @@
-import { Card, Hand, Score, Rank, Suit } from './types';
+import { Card, Hand, Score, HandType, Rank, Suit } from './types';
+import {
+	sortByRank
+} from './utils';
 
 /**
  * Evaluates poker hands and returns them with corresponding scores
@@ -15,8 +18,8 @@ export function evaluateHands(hands: Hand[]): Score[] {
  * @returns Score value
  */
 export function evaluateHand(hand: Hand): number {
-	// To be implemented
-	return 0;
+	// For now, just evaluate high card
+	return evaluateHighCard(hand);
 }
 
 /**
@@ -55,4 +58,26 @@ export function rankValue(rank: Rank): number {
 		default:
 			return parseInt(rank, 10);
 	}
+}
+
+/**
+ * Evaluates a high card hand
+ * @param hand The poker hand
+ * @returns The score for the high card hand
+ */
+export function evaluateHighCard(hand: Hand): number {
+	const sortedHand = sortByRank(hand);
+	
+	// Base score for high card is 0
+	// Add each card's value as a fraction of the score for tiebreakers
+	let score = HandType.HighCard;
+	
+	// Add values for tie-breaking (in descending order of importance)
+	sortedHand.forEach((card, index) => {
+		const value = rankValue(getRank(card));
+		// Scale each card based on position (first card most important)
+		score += value / Math.pow(100, index);
+	});
+	
+	return score;
 }
