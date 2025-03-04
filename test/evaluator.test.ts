@@ -2,7 +2,7 @@ import {
 	getRank,
 	getSuit,
 	rankValue,
-	evaluateHighCard
+	evaluateHighCard, evaluateOnePair, evaluateHand
 } from '../src';
 import { Hand } from '../src';
 
@@ -47,4 +47,33 @@ describe('Hand Evaluation - High Card', () => {
 		expect(score1).toBeGreaterThan(score3); // Same Ace high but better kicker
 		expect(score3).toBeGreaterThan(score2); // Ace high > King high
 	});
+});
+
+describe('Hand Evaluation - One Pair', () => {
+  test('evaluateOnePair should identify and rank one pair hands correctly', () => {
+    const pairOfAces: Hand = ['♦a', '♥a', '♠10', '♣7', '♦3'];     // Pair of aces
+    const pairOfKings: Hand = ['♦r', '♥r', '♠10', '♣9', '♦3'];     // Pair of kings
+    const pairOfAcesLowerKicker: Hand = ['♦a', '♥a', '♠9', '♣8', '♦3']; // Pair of aces with lower kickers
+    
+    const score1 = evaluateOnePair(pairOfAces);
+    const score2 = evaluateOnePair(pairOfKings);
+    const score3 = evaluateOnePair(pairOfAcesLowerKicker);
+    
+    expect(score1).toBeGreaterThan(score2);     // Pair of aces > Pair of kings
+    expect(score1).toBeGreaterThan(score3);     // Same pair but better kicker
+    expect(score3).toBeGreaterThan(score2);     // Pair of aces > Pair of kings regardless of kicker
+  });
+  
+  test('evaluateHand should correctly identify a pair', () => {
+    const pairHand: Hand = ['♦a', '♥a', '♠10', '♣7', '♦3'];       // Pair of aces
+    const highCardHand: Hand = ['♦a', '♥r', '♠10', '♣7', '♦3'];   // High card ace
+    
+    expect(evaluateHand(pairHand)).toBeGreaterThan(evaluateHand(highCardHand));
+  });
+  
+  test('evaluateOnePair should throw error for non-pair hand', () => {
+    const nonPairHand: Hand = ['♦a', '♥r', '♠10', '♣7', '♦3'];
+    
+    expect(() => evaluateOnePair(nonPairHand)).toThrow();
+  });
 });

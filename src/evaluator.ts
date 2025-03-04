@@ -1,5 +1,8 @@
 import { Card, Hand, Score, HandType, Rank, Suit } from './types';
 import {
+	getRankFrequencies,
+	isSameSuit,
+	isStraight,
 	sortByRank
 } from './utils';
 
@@ -18,7 +21,19 @@ export function evaluateHands(hands: Hand[]): Score[] {
  * @returns Score value
  */
 export function evaluateHand(hand: Hand): number {
-	// For now, just evaluate high card
+	// Get frequency of each rank
+	const frequencies = getRankFrequencies(hand);
+	const pairs = Array.from(frequencies.entries())
+		.filter(([_, count]) => count === 2);
+	
+	if (pairs.length === 2) {
+		return evaluateTwoPair(hand);
+	}
+	
+	if (pairs.length === 1) {
+		return evaluateOnePair(hand);
+	}
+	
 	return evaluateHighCard(hand);
 }
 
@@ -68,16 +83,89 @@ export function rankValue(rank: Rank): number {
 export function evaluateHighCard(hand: Hand): number {
 	const sortedHand = sortByRank(hand);
 	
-	// Base score for high card is 0
-	// Add each card's value as a fraction of the score for tiebreakers
-	let score = HandType.HighCard;
+	// Base value for hand type (0-9) * 10^14 to ensure hand types don't overlap
+	let score = HandType.HighCard * 10 ** 14;
 	
 	// Add values for tie-breaking (in descending order of importance)
-	sortedHand.forEach((card, index) => {
-		const value = rankValue(getRank(card));
-		// Scale each card based on position (first card most important)
-		score += value / Math.pow(100, index);
-	});
+	for (let i = 0; i < sortedHand.length; i++) {
+		const value = rankValue(getRank(sortedHand[i]));
+		// Each position is worth less by a factor of 100
+		score += value * 10 ** (2 * (4 - i));
+	}
+	
+	return score;
+}
+
+/**
+ * Evaluates a hand with one pair
+ * @param hand The poker hand
+ * @returns The score for the one pair hand
+ */
+export function evaluateOnePair(hand: Hand): number {
+	const frequencies = getRankFrequencies(hand);
+	const pairs = Array.from(frequencies.entries())
+		.filter(([_, count]) => count === 2);
+	
+	if (pairs.length !== 1) {
+		throw new Error('Hand does not contain exactly one pair');
+	}
+	
+	// Base value for hand type (0-9) * 10^14 to ensure hand types don't overlap
+	let score = HandType.OnePair * 10 ** 14;
+	
+	const pairRank = pairs[0][0];
+	const pairValue = rankValue(pairRank);
+	
+	// Add the pair's value as the primary tiebreaker (value * 10^8)
+	score += pairValue * 10 ** 8;
+	
+	// Sort the remaining cards (kickers) for secondary tiebreakers
+	const kickers = hand.filter(card => getRank(card) !== pairRank)
+		.map(card => rankValue(getRank(card)))
+		.sort((a, b) => b - a);
+	
+	// Add kickers in descending order of importance
+	for (let i = 0; i < kickers.length; i++) {
+		score += kickers[i] * 10 ** (2 * (2 - i));
+	}
+	
+	return score;
+}
+
+/**
+ * Evaluates a hand with two pairs
+ * @param hand The poker hand
+ * @returns The score for the two pair hand
+ */
+export function evaluateTwoPair(hand: Hand): number {
+	const frequencies = getRankFrequencies(hand);
+	const pairs = Array.from(frequencies.entries())
+		.filter(([_, count]) => count === 2);
+	
+	if (pairs.length !== 2) {
+		throw new Error('Hand does not contain exactly two pairs');
+	}
+	
+	// Base value for hand type (0-9) * 10^14 to ensure hand types don't overlap
+	let score = HandType.TwoPair * 10 ** 14;
+	
+	// Sort pairs by rank value (higher pair first)
+	pairs.sort((a, b) => rankValue(b[0]) - rankValue(a[0]));
+	
+	// Add higher pair as primary tiebreaker
+	score += rankValue(pairs[0][0]) * 10 ** 8;
+	
+	// Add lower pair as secondary tiebreaker
+	score += rankValue(pairs[1][0]) * 10 ** 4;
+	
+	// Find the kicker (the card that's not in either pair)
+	const pairRanks = new Set(pairs.map(p => p[0]));
+	const kicker = hand.find(card => !pairRanks.has(getRank(card)));
+	
+	if (kicker) {
+		// Add kicker as tertiary tiebreaker
+		score += rankValue(getRank(kicker));
+	}
 	
 	return score;
 }
